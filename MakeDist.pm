@@ -52,7 +52,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 
 );
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 
 # -----------------------------------------------
 
@@ -118,7 +118,7 @@ my($myself);
 
 		copy($$self{'_html_file'}, "$$self{'_base_name'}.html");
 
-		if ($$self{'_debug'})
+		if ($$self{'_verbose'})
 		{
 			print "Finished creating $$self{'_html_file'}\n";
 			print "Finished creating README\n";

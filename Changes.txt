@@ -1,5 +1,10 @@
 Revision history for Perl extension Module::MakeDist.
 
+1.06  Thu Oct 16 09:32:17 2003
+	- Change one stray instance of "if ($$self{'_debug'})" to "if ($$self{'_verbose'})".
+		'_debug' was left over from an earlier version of the code.
+		Now, when you turn on verbose mode, you'll get a tiny bit more output
+
 1.05  Mon Apr 28 21:22:00 2003
 	- Ive noticed backticks with redirection of STDERR fail sometimes under WinNT/2K,
 		so I've replaced `$Config{'make'} $option 2>&1` with `$Config{'make'} $option`

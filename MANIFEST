@@ -1,9 +1,9 @@
-Makefile.PL
-test.pl
-MakeDist.pm
 Changes.txt
 MakeDist.html
+MakeDist.pm
+Makefile.PL
 MANIFEST
 README
-examples/make-MakeDist.pl
+test.pl
 t/test.t
+examples/make-MakeDist.pl
