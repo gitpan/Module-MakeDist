@@ -1,5 +1,8 @@
 Revision history for Perl extension Module::MakeDist.
 
+1.02  Sat Oct 26 17:59:00
+	- Nmake failed silently building V 1.01 :-(
+
 1.01  Sat Oct 26 14:29:00
 	- Minor documentation changes. No need to upgrade
 
