@@ -5,5 +5,5 @@ Changes.txt
 MakeDist.html
 MANIFEST
 README
-t/test.t
 examples/make-MakeDist.pl
+t/test.t

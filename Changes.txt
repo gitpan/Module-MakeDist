@@ -1,5 +1,10 @@
 Revision history for Perl extension Module::MakeDist.
 
+1.05  Mon Apr 28 21:22:00 2003
+	- Ive noticed backticks with redirection of STDERR fail sometimes under WinNT/2K,
+		so I've replaced `$Config{'make'} $option 2>&1` with `$Config{'make'} $option`
+		rather than require the installation of IPC::Run3
+
 1.04  Mon Feb 17 10:04:00 2003
 	- Patch to stop shipping blib/ directory in Unix distros, because the
 		PAUSE indexer takes this directory to indicate a binary distro,

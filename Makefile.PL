@@ -8,7 +8,7 @@ WriteMakefile
 	($] ge '5.005') ?
 	(
 		'AUTHOR' => 'Ron Savage (ron@savage.net.au)',
-		'ABSTRACT' => 'Convert module into shippable files (*.tgz, *.zip)',
+		'ABSTRACT' => 'Convert module into shippable files (*.tgz, *.zip [ie ppd])',
     ) : (),
 	clean				=>
 	{

@@ -52,7 +52,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 
 );
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 # -----------------------------------------------
 
@@ -322,9 +322,13 @@ my($myself);
 		my($self, $option)	= @_;
 		$option				||= '';
 
-		# Run either '[dn]make' or '[dn]make ppd'.
+		# Run either '[dn]make' or '[dn]make clean' or '[dn]make ppd'.
+		# We don't redirect STDERR because:
+		# o We hope it never fails
+		# o `$Config{'make'} $option 2>&1` fails under WinNT/2K sometimes,
+		#	and omitting redirection is simpler than using IPC::Run3
 
-		`$Config{'make'} $option 2>&1`;
+		`$Config{'make'} $option`;
 
 		print "Finished running $Config{'make'} $option\n" if ($$self{'_verbose'});
 
