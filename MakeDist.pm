@@ -52,7 +52,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 
 );
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 # -----------------------------------------------
 
@@ -106,8 +106,16 @@ my($myself);
 			close OUT;
 		}
 
-		`pod2html --infile=$$self{'_base_name'}.pm --outfile=$$self{'_html_file'}`;
-		`pod2text $$self{'_base_name'}.pm > README`;
+		if ($$self{'_perl_version'} >= 58)
+		{
+			`pod2html --infile=$$self{'_base_name'}.pm --outfile=$$self{'_html_file'}`;
+		}
+		else
+		{
+			`pod2html $$self{'_base_name'}.pm $$self{'_html_file'}`;
+		}
+
+		`pod2text $$self{'_base_name'}.pm README`;
 
 		copy($$self{'_html_file'}, "$$self{'_base_name'}.html");
 
@@ -216,6 +224,15 @@ my($myself);
 
 		my($line)	= $self -> _read_file($$self{'_ppd_file'});
 		@$line		= map{$_ = "${1}x86/$$self{'_tar_gz_file'}$2" if (/^(.+CODEBASE HREF=")(".+)$/); $_;} @$line;
+
+		# Path *.ppd to fix ARCHITECTURE line.
+		# Beginning with Perl-5.8, Activestate adds the Perl version number
+		# to the NAME of the ARCHITECTURE tag in the ppd file.
+
+		if ($$self{'_perl_version'} >= 58)
+		{
+			@$line = map{$_ = "$1-$$self{'_perl_major'}.$$self{'_perl_minor'}$2" if (/^(.+ARCHITECTURE NAME=".+)(".+)$/); $_;} @$line;
+		}
 
 		open(OUT, "> $$self{'_ppd_file'}") || croak(__PACKAGE__ . ". Can't open(> $$self{'_ppd_file'}): $!");
 		binmode OUT;
@@ -431,6 +448,9 @@ sub new
 	$$self{'_base_name'}	=~ s/-\d.+$//;
 	$$self{'_html_file'}	= File::Spec -> catfile(@{$$self{'_html_dir'} }, "$$self{'_base_name'}.html");
 	$$self{'_module'}		= "$$self{'_name'}-$$self{'_version'}";
+	$$self{'_perl_major'}	= $^V ? ord(substr($^V, 0, 1) ) : 0;
+	$$self{'_perl_minor'}	= $^V ? ord(substr($^V, 1, 1) ) : 0;
+	$$self{'_perl_version'}	= 10 * $$self{'_perl_major'} + $$self{'_perl_minor'};
 	$$self{'_ppd_file'}		= "$$self{'_name'}.ppd";
 	$$self{'_ship_in_gzip'}	= [];
 	$$self{'_ship_in_zip'}	= [];

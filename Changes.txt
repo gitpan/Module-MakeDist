@@ -1,5 +1,9 @@
 Revision history for Perl extension Module::MakeDist.
 
+1.03  Fri Dec 13 16:21:22 2002
+	- Patch to match pod2html and pod2text in Perl V 5.8.0
+	- Patch ARCHITECTURE line output in *.ppd for ActiveState Perl V 5.8.0
+
 1.02  Sat Oct 26 17:59:00
 	- Nmake failed silently building V 1.01 :-(
 
