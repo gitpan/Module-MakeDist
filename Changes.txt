@@ -1,5 +1,15 @@
 Revision history for Perl extension Module::MakeDist.
 
+1.04  Mon Feb 17 10:04:00 2003
+	- Patch to stop shipping blib/ directory in Unix distros, because the
+		PAUSE indexer takes this directory to indicate a binary distro,
+		which means it does not index the module, and this in turn means
+		the module is not listed in the CPAN daily update list, etc.
+		Procedure:
+		o Create Unix-style distro *.tgz
+		o Create helper file *.tar.gz. You can ignore this file
+		o Create PPM-style distro *.zip, which contains *.tar.gz
+
 1.03  Fri Dec 13 16:21:22 2002
 	- Patch to match pod2html and pod2text in Perl V 5.8.0
 	- Patch ARCHITECTURE line output in *.ppd for ActiveState Perl V 5.8.0

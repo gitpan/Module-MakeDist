@@ -52,7 +52,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 
 );
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 # -----------------------------------------------
 
@@ -82,8 +82,7 @@ my($myself);
 
 	sub _make_gzip
 	{
-		my($self)		= @_;
-		my($tar)		= Archive::Tar -> new();
+		my($self) = @_;
 
 		mkpath([File::Spec -> catdir(@{$$self{'_html_dir'} })], 0, 0);
 
@@ -125,7 +124,7 @@ my($myself);
 			print "Finished creating README\n";
 		}
 
-		# Create KillerApp-1.00.tgz.
+		# Create KillerApp-1.00.tar.gz for PPM distro & KillerApp-1.00.tgz for Unix distro.
 
 		chdir('..') || croak("Can't chdir(..'): $!");
 
@@ -134,18 +133,20 @@ my($myself);
 		find(\&_what_to_gzip, $$self{'_module'});
 		find(\&_what_to_zip, $$self{'_module'});
 
-		@{$$self{'_ship_in_gzip'} } = map{s|\\|/|; $_;} @{$$self{'_ship_in_gzip'} };
+		@{$$self{'_ship_in_tar_gz'} }	= map{s|\\|/|; $_;} @{$$self{'_ship_in_tar_gz'} };
+		@{$$self{'_ship_in_tgz'} }		= map{s|\\|/|; $_;} @{$$self{'_ship_in_tgz'} };
 
 		if ($$self{'_verbose'})
 		{
-			print "Tarring: $_\n" for @{$$self{'_ship_in_gzip'} };
+			print "Tarring for PPM distro: $_\n" for @{$$self{'_ship_in_tar_gz'} };
+			print "Tarring for Unix distro: $_\n" for @{$$self{'_ship_in_tgz'} };
 		}
 
 		open(OUT, '>' . File::Spec -> catfile($$self{'_module'}, 'MANIFEST') ) || croak("Can't open(> MANIFEST): $!");
 
 		my($file_name);
 
-		for (@{$$self{'_ship_in_gzip'} })
+		for (@{$$self{'_ship_in_tgz'} })
 		{
 			# Since we called find from upstairs, we need to chop
 			# off the module name prefix and the dir separator.
@@ -161,17 +162,41 @@ my($myself);
 
 		print "Finished creating MANIFEST\n" if ($$self{'_verbose'});
 
-		$tar -> add_files(@{$$self{'_ship_in_gzip'} });
-		$tar -> write("$$self{'_module'}.tar");
+		my($tar_gz) = Archive::Tar -> new();	# For PPM distro.
+
+		$tar_gz -> add_files(@{$$self{'_ship_in_tar_gz'} });
+		$tar_gz -> write("$$self{'_module'}.tar");
 
 		chdir($$self{'_module'}) || croak("Can't chdir($$self{'_module'}): $!");
 
-		my($compressed)	= compress($tar -> write() );
+		my($compressed_tar_gz) = compress($tar_gz -> write() );
 
-		croak(__PACKAGE__ . ". Can't compress output from tar") if (! $compressed);
+		croak(__PACKAGE__ . ". Can't compress output from PPM tar") if (! $compressed_tar_gz);
 
-		my($gzip)	= gzopen($$self{'_tgz_file'}, 'wb9');
-		my($bytes)	= $gzip -> gzwrite($tar -> write() );
+		my($gzip)	= gzopen($$self{'_tar_gz_file'}, 'wb9');
+		my($bytes)	= $gzip -> gzwrite($tar_gz -> write() );
+
+		$gzip -> gzclose();
+
+		croak(__PACKAGE__ . ". Can't write gzipped data to $$self{'_tar_gz_file'}") if (! $bytes);
+
+		print "Finished creating $$self{'_tar_gz_file'}\n" if ($$self{'_verbose'});
+
+		chdir('..') || croak("Can't chdir(..'): $!");
+
+		my($tgz) = Archive::Tar -> new();	# For Unix distro.
+
+		$tgz -> add_files(@{$$self{'_ship_in_tgz'} });
+		$tgz -> write("$$self{'_module'}.tar");
+
+		chdir($$self{'_module'}) || croak("Can't chdir($$self{'_module'}): $!");
+
+		my($compressed_tgz) = compress($tgz -> write() );
+
+		croak(__PACKAGE__ . ". Can't compress output from Unix tar") if (! $compressed_tgz);
+
+		$gzip	= gzopen($$self{'_tgz_file'}, 'wb9');
+		$bytes	= $gzip -> gzwrite($tgz -> write() );
 
 		$gzip -> gzclose();
 
@@ -213,7 +238,7 @@ my($myself);
 
 		# Poor old ppm can't handle *.tgz.
 
-		copy($$self{'_tgz_file'}, File::Spec -> catfile('x86', $$self{'_tar_gz_file'}) );
+		copy($$self{'_tar_gz_file'}, File::Spec -> catfile('x86', $$self{'_tar_gz_file'}) );
 
 		$self -> _run_make('ppd');
 
@@ -345,9 +370,9 @@ my($myself);
 
 		# Handle blib sub directory separately, since we ship all of it.
 
-		if ($File::Find::name =~ /blib/)
+		if ( ($File::Find::name =~ /blib/) && ($File::Find::name ne 'pm_to_blib') )
 		{
-			push(@{$$myself{'_ship_in_gzip'} }, $File::Find::name);
+			push(@{$$myself{'_ship_in_tar_gz'} }, $File::Find::name);
 
 			return;
 		}
@@ -356,7 +381,8 @@ my($myself);
 
 		return if ( (/\.(bak|x~~)$/i) || (/^(Makefile(.old)?|pm_to_blib)$/i) );
 
-		push(@{$$myself{'_ship_in_gzip'} }, $File::Find::name);
+		push(@{$$myself{'_ship_in_tar_gz'} }, $File::Find::name);
+		push(@{$$myself{'_ship_in_tgz'} }, $File::Find::name);
 
 	}	# End of _what_to_gzip.
 
@@ -441,22 +467,23 @@ sub new
 
 	# Set up global variable for use by sub found().
 
-	$myself					= $self;
-	$$self{'_name'}			=~ s/::/-/g;
-	$$self{'_html_dir'}		= ['blib', 'html', 'site', 'lib', split(/-/, $$self{'_name'})];
-	$$self{'_base_name'}	= pop @{$$self{'_html_dir'} };
-	$$self{'_base_name'}	=~ s/-\d.+$//;
-	$$self{'_html_file'}	= File::Spec -> catfile(@{$$self{'_html_dir'} }, "$$self{'_base_name'}.html");
-	$$self{'_module'}		= "$$self{'_name'}-$$self{'_version'}";
-	$$self{'_perl_major'}	= $^V ? ord(substr($^V, 0, 1) ) : 0;
-	$$self{'_perl_minor'}	= $^V ? ord(substr($^V, 1, 1) ) : 0;
-	$$self{'_perl_version'}	= 10 * $$self{'_perl_major'} + $$self{'_perl_minor'};
-	$$self{'_ppd_file'}		= "$$self{'_name'}.ppd";
-	$$self{'_ship_in_gzip'}	= [];
-	$$self{'_ship_in_zip'}	= [];
-	$$self{'_tar_gz_file'}	= "$$self{'_module'}.tar.gz";	# For PPM distro.
-	$$self{'_tgz_file'}		= "$$self{'_module'}.tgz";		# For Unix distro.
-	$$self{'_zip_file'}		= "$$self{'_module'}.zip";
+	$myself						= $self;
+	$$self{'_name'}				=~ s/::/-/g;
+	$$self{'_html_dir'}			= ['blib', 'html', 'site', 'lib', split(/-/, $$self{'_name'})];
+	$$self{'_base_name'}		= pop @{$$self{'_html_dir'} };
+	$$self{'_base_name'}		=~ s/-\d.+$//;
+	$$self{'_html_file'}		= File::Spec -> catfile(@{$$self{'_html_dir'} }, "$$self{'_base_name'}.html");
+	$$self{'_module'}			= "$$self{'_name'}-$$self{'_version'}";
+	$$self{'_perl_major'}		= $^V ? ord(substr($^V, 0, 1) ) : 0;
+	$$self{'_perl_minor'}		= $^V ? ord(substr($^V, 1, 1) ) : 0;
+	$$self{'_perl_version'}		= 10 * $$self{'_perl_major'} + $$self{'_perl_minor'};
+	$$self{'_ppd_file'}			= "$$self{'_name'}.ppd";
+	$$self{'_ship_in_tar_gz'}	= [];	# For PPM distro.
+	$$self{'_ship_in_tgz'}		= [];	# For Unix distro.
+	$$self{'_ship_in_zip'}		= [];
+	$$self{'_tar_gz_file'}		= "$$self{'_module'}.tar.gz";	# For PPM distro.
+	$$self{'_tgz_file'}			= "$$self{'_module'}.tgz";		# For Unix distro.
+	$$self{'_zip_file'}			= "$$self{'_module'}.zip";
 
 	# Print before displaying error messages.
 	# This gives user an insight when things fail.
@@ -479,6 +506,12 @@ sub new
 	$self -> _make_zip();
 
 	print "Created $$self{'_tgz_file'} and $$self{'_zip_file'}\n" if ($$self{'_verbose'});
+
+	# Clean up.
+
+	chdir('..') || croak("Can't chdir(..'): $!");
+
+	unlink "$$self{'_module'}.tar";
 
 	return $self;
 
