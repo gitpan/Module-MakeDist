@@ -1,5 +1,15 @@
 Revision history for Perl extension Module::MakeDist.
 
+1.08  Tue Jul 20 20:43:00 2004
+	- Change Makefile.PL to coexist with Module::Build
+	- Add t/pod.t to test all PODs
+
+1.07  Mon Feb 23 15:18:23 2004
+	- Recent versions of pod2html are leaving files called pod2htmld.tmp and pod2htmli.tmp
+		in the working directory. Patch to stop shipping these files
+	- Also, recent versions of something are leaving a file called blibdirs in the
+		working directory. Patch to stop shipping this file
+
 1.06  Thu Oct 16 09:32:17 2003
 	- Change one stray instance of "if ($$self{'_debug'})" to "if ($$self{'_verbose'})".
 		'_debug' was left over from an earlier version of the code.

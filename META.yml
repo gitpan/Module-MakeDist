@@ -1,0 +1,23 @@
+--- #YAML:1.0
+name: Module-MakeDist
+version: 1.08
+author:
+  - Ron Savage <ron@savage.net.au>
+abstract: |-
+  Create Unix and ActiveState distros for a new module.
+license: artistic
+requires:
+  Archive::Tar: 0
+  Archive::Zip: 0
+  Carp: 0
+  Compress::Zlib: 0
+  Config: 0
+  File::Copy: 0
+  File::Find: 0
+  File::Path: 0
+  File::Spec: 0
+build_requires:
+  Test::More: 0
+  Test::Pod: 0
+provides: {}
+generated_by: Module::Build version 0.24

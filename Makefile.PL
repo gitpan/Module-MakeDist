@@ -21,5 +21,20 @@ WriteMakefile
 	},
 	DISTNAME			=> 'Module-MakeDist',
 	NAME				=> 'Module::MakeDist',
-	VERSION_FROM		=> 'MakeDist.pm',
+	PL_FILES			=> {},
+	PREREQ_PM			=>
+	{
+		Archive::Tar	=> 0,
+		Archive::Zip	=> 0,
+		Carp			=> 0,
+		Compress::Zlib	=> 0,
+		Config			=> 0,
+		File::Copy		=> 0,
+		File::Find		=> 0,
+		File::Path		=> 0,
+		File::Spec		=> 0,
+		Test::More		=> 0,
+		Test::Pod		=> 0,
+	},
+	VERSION_FROM		=> 'lib/Module/MakeDist.pm',
 );

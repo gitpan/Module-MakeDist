@@ -1,9 +1,12 @@
+Build.PL
 Changes.txt
-MakeDist.html
-MakeDist.pm
-Makefile.PL
-MANIFEST
-README
-test.pl
-t/test.t
 examples/make-MakeDist.pl
+lib/Module/MakeDist.pm
+Makefile.PL
+MANIFEST			This list of files
+MANIFEST.SKIP
+META.yml
+README
+t/pod.t
+t/test.t
+test.pl

@@ -52,7 +52,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 
 );
-our $VERSION = '1.06';
+our $VERSION = '1.08';
 
 # -----------------------------------------------
 
@@ -374,7 +374,7 @@ my($myself);
 
 		# Handle blib sub directory separately, since we ship all of it.
 
-		if ( ($File::Find::name =~ /blib/) && ($File::Find::name ne 'pm_to_blib') )
+		if ( ($File::Find::name =~ /blib/) && (! /^(blibdirs|pm_to_blib)$/) )
 		{
 			push(@{$$myself{'_ship_in_tar_gz'} }, $File::Find::name);
 
@@ -383,7 +383,7 @@ my($myself);
 
 		# Process only files likely to be of interest.
 
-		return if ( (/\.(bak|x~~)$/i) || (/^(Makefile(.old)?|pm_to_blib)$/i) );
+		return if ( (/\.(bak|tmp|x~~)$/i) || (/^(blibdirs|Makefile(.old)?|pm_to_blib)$/i) );
 
 		push(@{$$myself{'_ship_in_tar_gz'} }, $File::Find::name);
 		push(@{$$myself{'_ship_in_tgz'} }, $File::Find::name);
