@@ -1,4 +1,7 @@
 Revision history for Perl extension Module::MakeDist.
 
+1.01  Sat Oct 26 14:29:00
+	- Minor documentation changes. No need to upgrade
+
 1.00  Sat Sep 28 12:37:29 2002
 	- original version
