@@ -1,0 +1,214 @@
+<HTML>
+<HEAD>
+<TITLE>C<Module::MakeDist> - Create Unix and ActiveState distros for a new module.</TITLE>
+<LINK REV="made" HREF="mailto:">
+</HEAD>
+
+<BODY>
+
+<A NAME="__index__"></A>
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#name">NAME</A></LI>
+	<LI><A HREF="#synopsis">Synopsis</A></LI>
+	<LI><A HREF="#description">Description</A></LI>
+	<LI><A HREF="#distributions">Distributions</A></LI>
+	<LI><A HREF="#usage">Usage</A></LI>
+	<LI><A HREF="#options">Options</A></LI>
+	<LI><A HREF="#osspecific code">OS-specific Code</A></LI>
+	<LI><A HREF="#files shipped">Files Shipped</A></LI>
+	<LI><A HREF="#slashes 'v' backslashes">Slashes 'v' Backslashes</A></LI>
+	<LI><A HREF="#credits">Credits</A></LI>
+	<LI><A HREF="#author">Author</A></LI>
+	<LI><A HREF="#copyright">Copyright</A></LI>
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="name">NAME</A></H1>
+<P><CODE>Module::MakeDist</CODE> - Create Unix and ActiveState distros for a new module.</P>
+<P>
+<HR>
+<H1><A NAME="synopsis">Synopsis</A></H1>
+<PRE>
+        use Module::MakeDist;</PRE>
+<PRE>
+        # Work in /perl-modules/Module-MakeDist-1.00/.</PRE>
+<PRE>
+        Module::MakeDist -&gt; new
+        (
+                name            =&gt; 'Module::MakeDist',
+                verbose         =&gt; 0,
+                version         =&gt; '1.00',
+                work_dir        =&gt; '/perl-modules',
+        );</PRE>
+<P>
+<HR>
+<H1><A NAME="description">Description</A></H1>
+<P>Say we have a new module, KillerApp V 1.00, and in it's directory KillerApp-1.00/ are
+these files:</P>
+<UL>
+<LI>
+KillerApp.pm
+<P></P>
+<LI>
+Makefile.PL
+<P></P>
+<LI>
+Other files, such as test.pl, t/*.t, examples/*
+<P></P></UL>
+<P>Then this module processes the directory KillerApp-1.00/, and generates all files required to
+create shippable distributions (distros) in both Unix-style and ActiveState-style (ppm) formats.</P>
+<P>Files created are:</P>
+<UL>
+<LI>
+MANIFEST
+<P></P>
+<LI>
+README
+<P>We run pod2text on KillerApp.pm to create README.</P>
+<P></P>
+<LI>
+KillerApp.html
+<P>We run pod2html on KillerApp.pm to create KillerApp.html.</P>
+<P>The fancy *.html docs on my web site are output by fancy-pom2.pl, which is available
+elsewhere on my web site.</P>
+<P></P>
+<LI>
+KillerApp-1.00.tgz
+<P>The Unix-style distro.</P>
+<P>This can be uploaded to CPAN.</P>
+<P></P>
+<LI>
+KillerApp.ppd
+<P>This can be input to ppm.</P>
+<P></P>
+<LI>
+x86/KillerApp-1.00.tar.gz
+<P>This is a copy of KillerApp-1.00.tgz. The last time I tested it, ppm choked on a file
+called *.tgz.</P>
+<P></P>
+<LI>
+KillerApp-1.00.zip
+<P>The ActiveState ppm-style distro. This file contains KillerApp.ppd, README, KillerApp.html and
+x86/KillerApp-1.00.tar.gz.</P>
+<P></P></UL>
+<P>We do not use any external programs such as tar, gzip or zip.</P>
+<P>
+<HR>
+<H1><A NAME="distributions">Distributions</A></H1>
+<P>This module is available both as a Unix-style distro (*.tgz) and an
+ActiveState-style distro (*.ppd). The latter is shipped in a *.zip file.</P>
+<P>See <A HREF="http://savage.net.au/Perl-modules/html/installing-a-module.html">http://savage.net.au/Perl-modules/html/installing-a-module.html</A> for
+help on unpacking and installing each type of distro.</P>
+<P>
+<HR>
+<H1><A NAME="usage">Usage</A></H1>
+<P>As you can see from the program in the synopsis, which is the code I used
+to generate the distros for this very module, the class does all its work
+in the constructor. You do not call any other methods.</P>
+<P>
+<HR>
+<H1><A NAME="options">Options</A></H1>
+<P>Here, in alphabetical order, are the options accepted by the constructor,
+together with their default values.</P>
+<UL>
+<LI>
+name =&gt; ''
+<P>Name must be set to the name of the module. Eg:</P>
+<PRE>
+        name =&gt; 'Module::MakeDist'</PRE>
+<P>The '::' token is converted to '-', and combined with the version string,
+to construct the name of the directory in which the module's files are
+processed. This directory name is appended to the value of the work_dir
+option.</P>
+<P></P>
+<LI>
+verbose =&gt; 0
+<P>If verbose is set to some value &gt; 0, print statements are activated which
+show the steps in the flow of control.</P>
+<P></P>
+<LI>
+version =&gt; ''
+<P>This is the version string, normally something like '1.00'.</P>
+<P></P>
+<LI>
+work_dir =&gt; '.'
+<P>This is the parent directory of the module directory.</P>
+<P></P></UL>
+<P><CODE>Module::MakeDist</CODE> does a chdir into ``work_dir/name-version'' in order to
+start work.</P>
+<P>So, the example in the synopsis would mean this module attempts
+to work in '/perl-modules/Module-MakeDist-1.00/'.</P>
+<P>We use File::Spec to join the directory names.</P>
+<P>
+<HR>
+<H1><A NAME="osspecific code">OS-specific Code</A></H1>
+<P>There are 2 places where the read-only bit on a file is reset.</P>
+<P>The code uses $Config{'osname'} to look for a small selection of known OSes,
+and uses OS-specific commands for 'MSWin32' and 'linux' to do the reset.</P>
+<P>Patches are welcome.</P>
+<P>
+<HR>
+<H1><A NAME="files shipped">Files Shipped</A></H1>
+<P>See the source for subs called _what_to_gzip and _what_to_zip.</P>
+<P>Such lists of files which 'ought to be shipped' can be extended indefinitely.
+Hopefully, no real argument will ensue.</P>
+<P>However, if you do believe specific extra files should be included in the
+Unix-style distro, please let me know.</P>
+<P>
+<HR>
+<H1><A NAME="slashes 'v' backslashes">Slashes 'v' Backslashes</A></H1>
+<P>Perl is, and various Perl programs are, a bit of a mess when it comes to
+processing directory separators:</P>
+<UL>
+<LI>
+MANIFEST uses /
+<P>A line from this module's MANIFEST file looks like:</P>
+<PRE>
+        examples/make-MakeDist.pl</PRE>
+<P>Using a \ in this context means the file is omitted from the distro.</P>
+<P></P>
+<LI>
+*.ppd uses \
+<P>A line from this module's Module-MakeDist.ppd file looks like:</P>
+<PRE>
+        &lt;CODEBASE HREF=&quot;x86\Module-MakeDist-1.00.tar.gz&quot; /&gt;</PRE>
+<P>Using a / in this context actually works.</P>
+<P>Not only that, but to run ppm under MS Windows and install a module from a Linux box,
+the CODEBASE must use /.</P>
+<P></P></UL>
+<P>
+<HR>
+<H1><A NAME="credits">Credits</A></H1>
+<P>I gained important information from these sources:</P>
+<DL>
+<DT><STRONG><A NAME="item_idnopheq">idnopheq</A></STRONG><BR>
+<DD>
+<A HREF="http://www.perlmonks.org/index.pl?node_id=113448">http://www.perlmonks.org/index.pl?node_id=113448</A>
+<P></P>
+<DT><STRONG><A NAME="item_Jenda_Krynicky">Jenda Krynicky</A></STRONG><BR>
+<DD>
+<A HREF="http://jenda.krynicky.cz/perl/PPM.html">http://jenda.krynicky.cz/perl/PPM.html</A>
+<P></P></DL>
+<P>
+<HR>
+<H1><A NAME="author">Author</A></H1>
+<P><CODE>Module::MakeDist</CODE> was written by Ron Savage <EM>&lt;<A HREF="mailto:ron@savage.net.au">ron@savage.net.au</A>&gt;</EM> in 2002.</P>
+<P>Home page: <A HREF="http://savage.net.au/index.html">http://savage.net.au/index.html</A></P>
+<P>
+<HR>
+<H1><A NAME="copyright">Copyright</A></H1>
+<P>Austrlian copyright (c) 2002, Ron Savage. All rights reserved.</P>
+<PRE>
+        All Programs of mine are 'OSI Certified Open Source Software';
+        you can redistribute them and/or modify them under the terms of
+        The Artistic License, a copy of which is available at:
+        <A HREF="http://www.opensource.org/licenses/index.html">http://www.opensource.org/licenses/index.html</A></PRE>
+
+</BODY>
+
+</HTML>

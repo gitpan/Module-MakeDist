@@ -1,0 +1,180 @@
+NAME
+    "Module::MakeDist" - Create Unix and ActiveState distros for a new
+    module.
+
+Synopsis
+            use Module::MakeDist;
+
+            # Work in /perl-modules/Module-MakeDist-1.00/.
+
+            Module::MakeDist -> new
+            (
+                    name            => 'Module::MakeDist',
+                    verbose         => 0,
+                    version         => '1.00',
+                    work_dir        => '/perl-modules',
+            );
+
+Description
+    Say we have a new module, KillerApp V 1.00, and in it's directory
+    KillerApp-1.00/ are these files:
+
+    *   KillerApp.pm
+
+    *   Makefile.PL
+
+    *   Other files, such as test.pl, t/*.t, examples/*
+
+    Then this module processes the directory KillerApp-1.00/, and generates
+    all files required to create shippable distributions (distros) in both
+    Unix-style and ActiveState-style (ppm) formats.
+
+    Files created are:
+
+    *   MANIFEST
+
+    *   README
+
+        We run pod2text on KillerApp.pm to create README.
+
+    *   KillerApp.html
+
+        We run pod2html on KillerApp.pm to create KillerApp.html.
+
+        The fancy *.html docs on my web site are output by fancy-pom2.pl,
+        which is available elsewhere on my web site.
+
+    *   KillerApp-1.00.tgz
+
+        The Unix-style distro.
+
+        This can be uploaded to CPAN.
+
+    *   KillerApp.ppd
+
+        This can be input to ppm.
+
+    *   x86/KillerApp-1.00.tar.gz
+
+        This is a copy of KillerApp-1.00.tgz. The last time I tested it, ppm
+        choked on a file called *.tgz.
+
+    *   KillerApp-1.00.zip
+
+        The ActiveState ppm-style distro. This file contains KillerApp.ppd,
+        README, KillerApp.html and x86/KillerApp-1.00.tar.gz.
+
+    We do not use any external programs such as tar, gzip or zip.
+
+Distributions
+    This module is available both as a Unix-style distro (*.tgz) and an
+    ActiveState-style distro (*.ppd). The latter is shipped in a *.zip file.
+
+    See http://savage.net.au/Perl-modules/html/installing-a-module.html for
+    help on unpacking and installing each type of distro.
+
+Usage
+    As you can see from the program in the synopsis, which is the code I
+    used to generate the distros for this very module, the class does all
+    its work in the constructor. You do not call any other methods.
+
+Options
+    Here, in alphabetical order, are the options accepted by the
+    constructor, together with their default values.
+
+    *   name => ''
+
+        Name must be set to the name of the module. Eg:
+
+                name => 'Module::MakeDist'
+
+        The '::' token is converted to '-', and combined with the version
+        string, to construct the name of the directory in which the module's
+        files are processed. This directory name is appended to the value of
+        the work_dir option.
+
+    *   verbose => 0
+
+        If verbose is set to some value > 0, print statements are activated
+        which show the steps in the flow of control.
+
+    *   version => ''
+
+        This is the version string, normally something like '1.00'.
+
+    *   work_dir => '.'
+
+        This is the parent directory of the module directory.
+
+    "Module::MakeDist" does a chdir into "work_dir/name-version" in order to
+    start work.
+
+    So, the example in the synopsis would mean this module attempts to work
+    in '/perl-modules/Module-MakeDist-1.00/'.
+
+    We use File::Spec to join the directory names.
+
+OS-specific Code
+    There are 2 places where the read-only bit on a file is reset.
+
+    The code uses $Config{'osname'} to look for a small selection of known
+    OSes, and uses OS-specific commands for 'MSWin32' and 'linux' to do the
+    reset.
+
+    Patches are welcome.
+
+Files Shipped
+    See the source for subs called _what_to_gzip and _what_to_zip.
+
+    Such lists of files which 'ought to be shipped' can be extended
+    indefinitely. Hopefully, no real argument will ensue.
+
+    However, if you do believe specific extra files should be included in
+    the Unix-style distro, please let me know.
+
+Slashes 'v' Backslashes
+    Perl is, and various Perl programs are, a bit of a mess when it comes to
+    processing directory separators:
+
+    *   MANIFEST uses /
+
+        A line from this module's MANIFEST file looks like:
+
+                examples/make-MakeDist.pl
+
+        Using a \ in this context means the file is omitted from the distro.
+
+    *   *.ppd uses \
+
+        A line from this module's Module-MakeDist.ppd file looks like:
+
+                <CODEBASE HREF="x86\Module-MakeDist-1.00.tar.gz" />
+
+        Using a / in this context actually works.
+
+        Not only that, but to run ppm under MS Windows and install a module
+        from a Linux box, the CODEBASE must use /.
+
+Credits
+    I gained important information from these sources:
+
+    idnopheq
+        http://www.perlmonks.org/index.pl?node_id=113448
+
+    Jenda Krynicky
+        http://jenda.krynicky.cz/perl/PPM.html
+
+Author
+    "Module::MakeDist" was written by Ron Savage *<ron@savage.net.au>* in
+    2002.
+
+    Home page: http://savage.net.au/index.html
+
+Copyright
+    Austrlian copyright (c) 2002, Ron Savage. All rights reserved.
+
+            All Programs of mine are 'OSI Certified Open Source Software';
+            you can redistribute them and/or modify them under the terms of
+            The Artistic License, a copy of which is available at:
+            http://www.opensource.org/licenses/index.html
+
